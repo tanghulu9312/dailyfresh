@@ -156,3 +156,6 @@ EMAIL_HOST_USER = 'tanghulu9312@163.com'
 EMAIL_HOST_PASSWORD = 'CSHY520'
 # 收件人看到的发件人
 EMAIL_FROM = '天天生鲜<tanghulu9312@163.com>'
+
+#配置登录URL地址
+LOGIN_URL = '/user/login/'

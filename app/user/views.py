@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,HttpResponse
 from django.urls import reverse
-from user.models import User
+from user.models import User,Address
 from django.views import View
 from django import forms
 from django.forms import widgets,fields
@@ -9,8 +9,8 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from itsdangerous import SignatureExpired
 from django.conf import settings
 from celery_tasks.tasks import send_register_active_email
-from django.contrib.auth import authenticate,login
-
+from django.contrib.auth import authenticate,login,logout
+from utils.mixin import LoginRequiredMixin
 # Create your views here.
 
 class RegisterVerify(forms.Form):
@@ -134,8 +134,10 @@ class LoginView(View):
                 #用户已激活
                 #记录用户登录状态
                 login(request,user)
-                #跳转到首页
-                response = redirect(reverse('goods:index'))
+                #获取登录后跳转的页面，默认跳转到首页
+                next_url = request.GET.get('next','goods:index')
+
+                response = redirect(next_url)
 
                 #判断用户是否需要记住用户名
                 if remenber == 'on':
@@ -151,6 +153,88 @@ class LoginView(View):
         else:
             #用户名或密码错误
             return  render(request,'login.html',{'errmsg':'用户名或密码错误'})
+
+class LogoutView(View):
+    def get(self,request):
+        logout(request)
+        return redirect(reverse('user:login'))
+
+class UserInfoView(LoginRequiredMixin,View):
+    def get(self,request):
+        user = request.user
+        address = Address.objects.get_default_address(user)
+
+        return render(request,'user_center_info.html',{'page':'user','address':address})
+
+class UserOrderView(LoginRequiredMixin,View):
+    def get(self,request):
+        return render(request,'user_center_order.html',{'page':'order'})
+
+class UserAddressView(LoginRequiredMixin,View):
+
+    def get(self,request):
+
+        #查询当前用户的默认收货地址
+        user = request.user
+        #
+        # try:
+        #     address = Address.objects.get(user=user,is_default=True)
+        # except Address.DoesNotExist:
+        #     #不存在默认收货地址
+        #     address = None
+        address = Address.objects.get_default_address(user)
+
+        return render(request,'user_center_site.html',{'page':'address','address':address})
+
+    def post(self,request):
+        #获取数据
+
+        receiver = request.POST.get('receiver')
+        zip_code = request.POST.get('zip_code')
+        phone = request.POST.get('phone')
+        addr = request.POST.get('addr')
+
+        #校验数据
+        # 校验数据
+        if not all([receiver, addr, phone]):
+            return render(request, 'user_center_site.html', {'errmsg':'数据不完整'})
+        #校验手机号码
+        if not re.match(r'^1[3|4|5|7|8][0-9]{9}$',phone):
+            return render(request,'user_center_site.html',{'errmsg':'手机格式不正确'})
+        #业务处理：地址添加
+        #如果用户已经存在默认收货地址，添加的地址不作为默认收货地址
+        #获取登录用户对应的User对象
+        user = request.user
+        # try:
+        #     address = Address.objects.get(user=user,is_default=True)
+        # except Address.DoesNotExist:
+        #     #不存在默认收货地址
+        #     address = None
+        address = Address.objects.get_default_address(user)
+        if address:
+            is_default = False
+        else:
+            is_default = True
+
+        #添加地址
+
+        Address.objects.create(
+            user=user,
+            receiver = receiver,
+            addr = addr,
+            phone = phone,
+            zip_code = zip_code,
+            is_default = is_default
+        )
+        #返回应答，刷新地址页面
+        return redirect(reverse('user:address'))
+
+
+
+
+
+
+
 
 
 
