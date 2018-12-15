@@ -11,7 +11,11 @@ from celery import Celery
 from django.core.mail import send_mail
 from django.conf import settings
 import time
-
+# 在任务处理者一端加这几句
+# import os
+# import django
+# os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dailyfresh.settings")
+# django.setup()
 #创建一个Celery类的实例对象
 app = Celery('celery_tasks_tasks',broker='redis://192.168.8.22:6380/2')
 
