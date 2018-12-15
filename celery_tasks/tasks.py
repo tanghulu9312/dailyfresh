@@ -13,7 +13,7 @@ from django.conf import settings
 import time
 
 #创建一个Celery类的实例对象
-app = Celery('celery_tasks_tasks',broker='redis://127.0.0.1:6379/2')
+app = Celery('celery_tasks_tasks',broker='redis://192.168.8.22:6380/2')
 
 #定义任务函数
 @app.task

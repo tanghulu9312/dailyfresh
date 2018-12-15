@@ -1,6 +1,7 @@
 from django.shortcuts import render,redirect,HttpResponse
 from django.urls import reverse
 from user.models import User,Address
+from goods.models import GoodsSKU
 from django.views import View
 from django import forms
 from django.forms import widgets,fields
@@ -11,6 +12,7 @@ from django.conf import settings
 from celery_tasks.tasks import send_register_active_email
 from django.contrib.auth import authenticate,login,logout
 from utils.mixin import LoginRequiredMixin
+from django_redis import get_redis_connection
 # Create your views here.
 
 class RegisterVerify(forms.Form):
@@ -160,11 +162,32 @@ class LogoutView(View):
         return redirect(reverse('user:login'))
 
 class UserInfoView(LoginRequiredMixin,View):
+    '''用户中心-信息页'''
     def get(self,request):
+        "显示"
         user = request.user
         address = Address.objects.get_default_address(user)
 
-        return render(request,'user_center_info.html',{'page':'user','address':address})
+        #获取用户的历史浏览记录
+        # from redis import StrictRedis
+        # sr = StrictRedis(host='192.168.8.22',port='6379',db=2)
+        con = get_redis_connection('default')
+
+        history_key = 'history_%d'%user.id
+        #获取用户最新浏览的5个商品ID
+        sku_ids = con.lrang(history_key,0,4)
+        #遍历获取用户浏览的商品信息
+        goods_list = []
+        for id in sku_ids:
+            goods = GoodsSKU.objects.get(id=id)
+            goods_list.append(goods)
+        #组织上下文
+        context = {
+            'page':'user',
+            'address':address,
+            'goods_list':goods_list
+        }
+        return render(request,'user_center_info.html',context)
 
 class UserOrderView(LoginRequiredMixin,View):
     def get(self,request):
