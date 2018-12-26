@@ -175,7 +175,7 @@ class UserInfoView(LoginRequiredMixin,View):
 
         history_key = 'history_%d'%user.id
         #获取用户最新浏览的5个商品ID
-        sku_ids = con.lrang(history_key,0,4)
+        sku_ids = con.lrange(history_key,0,4)
         #遍历获取用户浏览的商品信息
         goods_list = []
         for id in sku_ids:

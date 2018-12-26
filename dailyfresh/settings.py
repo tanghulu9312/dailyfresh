@@ -166,7 +166,7 @@ CACHES={
         "LOCATION":"redis://192.168.8.22:6380/2",
         "OPTIONS":{
             "CLIENT_CLASS":"django_redis.client.DefaultClient",
-            "PASSWORD":"admin123"
+#            "PASSWORD":"admin123"
         }
     }
 }
