@@ -19,6 +19,8 @@ from django.conf.urls import url
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('tinymce/',include('tinymce.urls')),   #富文本编辑器
+    path('search/',include('haystack.urls')),   #全文检索框架
     path('user/', include('user.urls',namespace='user')),
     path('cart/', include('cart.urls',namespace='cart')),
     path('order/', include('order.urls',namespace='order')),
