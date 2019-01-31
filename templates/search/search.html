@@ -13,15 +13,17 @@
 
         <ul class="goods_type_list clearfix">
             {% for item in page %}
-            <li>
-                <a href="{% url 'goods:detail' item.object.id %}"><img src="{{ item.object.image.url }}"></a>
-                <h4><a href="{% url 'goods:detail' item.object.id %}">{{ item.object.name }}</a></h4>
-                <div class="operate">
-                    <span class="prize">￥{{ item.object.price }}</span>
-                    <span class="unit">{{ item.object.price }}/{{ item.object.unite }}</span>
-                    <a href="#" class="add_goods" title="加入购物车"></a>
-                </div>
-            </li>
+                <li>
+                    <a href="{% url 'goods:detail' item.object.id %}"><img src="{{ item.object.image.url }}"></a>
+                    <h4><a href="{% url 'goods:detail' item.object.id %}">{{ item.object.name }}</a></h4>
+                    <div class="operate">
+                        <span class="prize">￥{{ item.object.price }}</span>
+                        <span class="unit">{{ item.object.price }}/{{ item.object.unite }}</span>
+                        <a href="#" class="add_goods" title="加入购物车"></a>
+                    </div>
+                </li>
+                {% empty %}
+                    <p>没有找到您要查询的商品</p>
             {% endfor %}
         </ul>
 
@@ -40,6 +42,7 @@
         {% else %}
             <a href="/search?q={{ query }}&page={{ pindex }}">{{ pindex }}</a>
         {% endif %}
+
     {% endfor %}
 
     {% if page.has_next %}

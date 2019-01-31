@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'haystack',
+    'haystack', #全文检索框架
     'tinymce',  #富文本编辑器
     'user',     #用户模块
     'goods',    #商品模块
